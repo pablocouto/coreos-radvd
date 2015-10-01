@@ -1,0 +1,23 @@
+[Unit]
+Description=radvd
+After=network-online.target docker.service
+Requires=network-online.target docker.service
+
+[Service]
+TimeoutStartSec=0
+
+ExecStartPre=-/usr/bin/docker stop %n
+ExecStartPre=-/usr/bin/docker rm %n
+#ExecStartPre=/usr/bin/docker pull pablocouto/coreos-radvd
+
+ExecStart=/usr/bin/docker run --name=%n \
+            --net=host --privileged=true \
+            -v /dev/log:/dev/log \
+            -v /etc/radvd.conf:/etc/radvd.conf \
+            pablocouto/coreos-radvd -d 1
+            
+ExecStop=/usr/bin/docker stop %n
+ExecStop=/usr/bin/docker rm %n
+
+[Install]
+WantedBy=multi-user.target
